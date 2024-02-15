@@ -1,119 +1,113 @@
-//Global variables
-var element;
+const navBar = document.querySelector(".nav");
+const navButton = document.querySelector(".nav-toggle");
+const counterElements = document.querySelectorAll(".get-started .counter");
+const footerForm = document.querySelector(".footer-form");
+const emailForm = footerForm.querySelector(".footer-email");
+const videoContainer = document.querySelector(".video-learning");
+const video = videoContainer.querySelector(".video");
+const progress = videoContainer.querySelector(".progress");
+const progressBar = videoContainer.querySelector(".progress-fill");
+const togglePlayButton = videoContainer.querySelector(".toggle");
+const skipButtons = videoContainer.querySelectorAll("[data-skip]");
+let mousedown = false;
 
-//Detect onclick event
-if (window.matchMedia("(max-width: 920px)").matches === false) {
-  $(".ham").on("click", function () {
-    $(".side_menu").css("right", "0px");
-    $(".overlay").css("opacity", "1");
-    $(".overlay").css("z-index", "99");
-  });
-
-  $(".close").on("click", function () {
-    $(".contact").css("top") >= "10%"
-      ? $(".contact").hide().css("top", "-100%").fadeOut("100")
-      : $(".side_menu").css("right", "-500px");
-    $(".overlay").css("opacity", "0");
-    $(".overlay").css("z-index", "-1");
-  });
-
-  $(".overlay").on("click", function () {
-    $(".contact").css("top") >= "10%"
-      ? $(".contact").hide().css("top", "-100%").fadeOut("100")
-      : $(".side_menu").css("right", "-500px");
-    $(".overlay").css("opacity", "0");
-    $(".overlay").css("z-index", "-1");
-  });
-} else {
-  $(".ham").on("click", function () {
-    $(".side_menu").css("right", "0px");
-    $(".overlay").css("opacity", "1");
-    $(".overlay").css("z-index", "9");
-  });
-
-  $(".close").on("click", function () {
-    $(".contact").css("top") >= "10%"
-      ? $(".contact").hide().css("top", "-100%").fadeOut("100")
-      : $(".side_menu").css("right", "-120%");
-    $(".overlay").css("opacity", "0");
-    $(".overlay").css("z-index", "-1");
-  });
-
-  $(".overlay").on("click", function () {
-    $(".contact").css("top") >= "10%"
-      ? $(".contact").hide().css("top", "-100%").fadeOut("100")
-      : $(".side_menu").css("right", "-120%");
-    $(".overlay").css("opacity", "0");
-    $(".overlay").css("z-index", "-1");
-  });
+// Hamburger Navigation
+function toggleNavigation() {
+  if (navBar.classList.contains("is-open")) {
+    this.setAttribute("aria-expanded", false);
+    navBar.classList.remove("is-open");
+  } else {
+    navBar.classList.add("is-open");
+    this.setAttribute("aria-expanded", true);
+  }
 }
 
-//Scroller Nav
-window.onscroll = function () {
-  if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
-    $("nav").addClass("fixed_nav");
-  } else {
-    $("nav").removeClass("fixed_nav");
-  }
-};
+// Newsletter form submit
+function createAlert(elem, msg) {
+  if (footerForm.querySelector("span.form-error-message")) return;
+  const alertElement = document.createElement(elem);
+  alertElement.setAttribute("role", "alert");
+  alertElement.classList.add("form-error-message");
+  alertElement.textContent = msg;
+  emailForm.insertAdjacentElement("afterend", alertElement);
+}
 
-//DETECT ESC KEY PRESSED
-document.onkeydown = function (evt) {
-  evt = evt || window.event;
-  var isEscape = false;
-  if ("key" in evt) {
-    isEscape = evt.key === "Escape" || evt.key === "Esc";
-  } else {
-    isEscape = evt.keyCode === 27;
+function handleFormSubmit(e) {
+  const pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  if (!pattern.test(emailForm.value.trim())) {
+    e.preventDefault();
+    footerForm.classList.add("form-error");
+    createAlert("span", "Email is not valid");
   }
-  if (isEscape) {
-    if ($(".overlay").css("opacity") == "1") {
-      $(".contact").css("top") >= "10%"
-        ? $(".contact").hide().css("top", "-100%").fadeOut("100")
-        : $(".side_menu").css("right", "-120%");
-      $(".overlay").css("opacity", "0");
-      $(".overlay").css("z-index", "-1");
+}
+
+// Video player
+function togglePlay() {
+  if (video.paused) {
+    video.play();
+  } else {
+    video.pause();
+  }
+}
+
+function changeButton() {
+  togglePlayButton.textContent = this.paused ? "►" : "❚❚";
+}
+
+function skipSeconds() {
+  video.currentTime += +this.dataset.skip;
+}
+
+function handleProgressBar() {
+  const percent = (video.currentTime / video.duration) * 100;
+  progressBar.style.flexBasis = `${percent}%`;
+}
+
+function handleProgressBarProgress(e) {
+  const progressTime = (e.offsetX / progress.offsetWidth) * video.duration;
+  video.currentTime = progressTime;
+}
+
+// Counters
+function counter(target, start, stop) {
+  target.innerText = 0.1;
+  const counterInterval = setInterval(() => {
+    start += 0.1;
+    const valueConverted = (Math.round(start * 100) / 100).toFixed(1);
+    target.innerText = valueConverted;
+    if (valueConverted == stop) {
+      clearInterval(counterInterval);
     }
-  }
-};
-
-//Dropdown
-$(".dropdown").click(function () {
-  if ($(this).children("aside").is(":hidden")) {
-    $(this).children("aside").show("slow");
-    $(this).children("a").css("color", "var(--white)");
-  } else {
-    $(this).children("aside").hide("slow");
-    $(this).children("a").css("color", "var(--lite)");
-  }
-});
-
-//Global variables
-var slidestoshow, arrowmark;
-if (window.matchMedia("(max-width: 920px)").matches === false) {
-  slidestoshow = 4;
-  arrowmark = true;
-} else {
-  slidestoshow = 1;
-  arrowmark = false;
+  }, 30);
 }
 
-$(".blog-slider").slick({
-  slidesToShow: slidestoshow,
-  slidesToScroll: 1,
-  dots: false,
-  arrows: arrowmark,
-  autoplay: true,
-  autoplaySpeed: 2000,
-  infinite: true
-});
+function obCallBack(entries) {
+  entries.forEach((entry) => {
+    const { target } = entry;
+    const stopValue = target.innerText;
+    const startValue = 0;
+    if (!entry.isIntersecting) return;
+    counter(target, startValue, stopValue);
+    counterObserver.unobserve(target);
+  });
+}
 
-$(".event-slider").slick({
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  dots: false,
-  arrows: false,
-  autoplay: true,
-  autoplaySpeed: 4000,
-  infinite: true
-});
+const counterObserver = new IntersectionObserver(obCallBack, { threshold: 1 });
+counterElements.forEach((counterElem) => counterObserver.observe(counterElem));
+
+// Event Listeners
+navButton.addEventListener("click", toggleNavigation);
+footerForm.addEventListener("submit", handleFormSubmit);
+video.addEventListener("click", togglePlay);
+video.addEventListener("play", changeButton);
+video.addEventListener("pause", changeButton);
+video.addEventListener("timeupdate", handleProgressBar);
+togglePlayButton.addEventListener("click", togglePlay);
+progress.addEventListener("click", handleProgressBarProgress);
+progress.addEventListener(
+  "mousemove",
+  (e) => mousedown && handleProgressBarProgress(e)
+);
+progress.addEventListener("mousedown", () => (mousedown = true));
+progress.addEventListener("mouseup", () => (mousedown = false));
+skipButtons.forEach((button) => button.addEventListener("click", skipSeconds));
